@@ -1,64 +1,44 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const validator = require("validator");
-const bcrypt = require("bcrypt");
 
-const UserSchema = new Schema(
-  {
-    name: { type: String, required: true },
-    email: {
-      type: String,
-      required: [true, "Please provide tour email address"],
-      unqiue: [true, "This email address already exist"],
-      lowercase: true,
-      validate: [validator.isEmail, "Please provide a valid email address"],
-    },
-    role: {
-      type: String,
-      enum: ["admin", "user"],
-      default: "user",
-    },
-    password: {
-      type: String,
-      required: true,
-      minlength: 8,
-    },
-    address: {
-      type: String,
-      trim: true,
-    },
-    phoneNumber: {
-      type: String,
-      validate: {
-        validator: function (v) {
-          return /^(\+90|0)?5\d{9}$/.test(v);
-        },
-        message: (props) => `${props.value} is not a valid phone number!`,
-      },
-    },
-    picture: {
-      type: String,
-      default: "https://cdn-icons-png.freepik.com/512/8188/8188362.png",
-    },
-    verificationCode: { type: Number },
-    isVerified: { type: Boolean, default: false },
-    passwordToken: { type: Number },
-    passwordTokenExpirationDate: { type: String },
+const zoneSchema = new Schema({
+  title: { type: String, required: true }, // Lokasyon başlığı
+  coordinates: {
+    latitude: { type: Number, required: true }, // Enlem
+    longitude: { type: Number, required: true } // Boylam
   },
-  { timestamps: true }
-);
-
-UserSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  zoneRadius: { type: Number, required: true } // Çemberin yarıçapı (metre cinsinden)
 });
 
-UserSchema.methods.comparePassword = async function (candidatePassword) {
-  const isMatch = await bcrypt.compare(candidatePassword, this.password);
-  return isMatch;
-};
+const logSchema = new Schema({
+  action: { type: String, required: true }, // Yapılan işlem (örn: "okula geldi", "evden çıktı")
+  date: { type: Date, default: Date.now } // İşlemin yapıldığı zaman
+});
 
-const User = mongoose.model("User", UserSchema);
+const subscriptionSchema = new Schema({
+  isActive: { type: Boolean, default: false }, // Abonelik durumu
+  expirationDate: { type: Date }, // Aboneliğin bitiş tarihi
+  paymentId: { type: String, required: true }, // Ödeme bilgisi için kullanılacak ID
+  lastPaymentDate: { type: Date }, // Son ödeme tarihi
+  paymentMethod: { type: String, required: true } // Ödeme yöntemi (örn: "Apple", "Google")
+});
+
+const userSchema = new Schema({
+  deviceId: { type: String, required: true, unique: true }, // Cihaz ID'si (örn: UUID)
+  code: { type: String, required: true, unique: true }, // Kullanıcı kodu
+  zones: [zoneSchema], // Kullanıcının belirlediği lokasyon çemberleri
+  currentLocation: { // Kullanıcının mevcut konumu
+    latitude: { type: Number, required: true }, // Mevcut enlem
+    longitude: { type: Number, required: true }, // Mevcut boylam
+    timestamp: { type: Date, default: Date.now } // Konum güncellenme zamanı
+  },
+  following: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Takip ettiğim
+  followers: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Beni Takip eden kullanıcılar
+  visibility: { type: Boolean, default: true }, // Kullanıcının görünürlük durumu
+  logs: [logSchema], // Kullanıcının yaptığı işlemler
+  subscription: subscriptionSchema // Kullanıcının abonelik bilgileri
+});
+
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;

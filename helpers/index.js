@@ -1,9 +1,7 @@
-const sendEmail = require('./sendEmail');
-const sendResetPasswordEmail = require('./sendResetPasswordEmail');
-const sendVerificationEmail = require('./sendVerficationEmail');
+const generateRandomCode = require('./generateRandomCode');
+const getDistanceFromLatLonInMeters = require('./getDistance');
 
 module.exports = {
-    sendEmail,
-    sendVerificationEmail,
-    sendResetPasswordEmail,
+    generateRandomCode,
+    getDistanceFromLatLonInMeters
 };

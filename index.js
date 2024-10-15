@@ -12,7 +12,7 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./config/connectDB');
 
 //routers
-const authRouter = require('./routers/auth');
+const authRouter = require('./routers/v1/user');
 
 //midlleware
 const notFoundMiddleware = require('./middleware/not-found')
