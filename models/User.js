@@ -23,6 +23,11 @@ const subscriptionSchema = new Schema({
   paymentMethod: { type: String, required: true } // Ödeme yöntemi (örn: "Apple", "Google")
 });
 
+const followingSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Takip edilen kullanıcı ID'si
+  nickname: { type: String, required: true } // Takip edilen kullanıcı için takma ad
+});
+
 const userSchema = new Schema({
   deviceId: { type: String, required: true, unique: true }, // Cihaz ID'si (örn: UUID)
   code: { type: String, required: true, unique: true }, // Kullanıcı kodu
@@ -32,8 +37,8 @@ const userSchema = new Schema({
     longitude: { type: Number, required: true }, // Mevcut boylam
     timestamp: { type: Date, default: Date.now } // Konum güncellenme zamanı
   },
-  following: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Takip ettiğim
-  followers: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Beni Takip eden kullanıcılar
+  following: [followingSchema], // Takip ettiğim kullanıcılar ve takma adları
+  followers: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Beni takip eden kullanıcılar
   visibility: { type: Boolean, default: true }, // Kullanıcının görünürlük durumu
   logs: [logSchema], // Kullanıcının yaptığı işlemler
   subscription: subscriptionSchema // Kullanıcının abonelik bilgileri
