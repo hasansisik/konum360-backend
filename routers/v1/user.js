@@ -9,7 +9,7 @@ const {
   checkZone,
   getLog,
   getCode
-} = require("../../controllers/user");
+} = require("../../controllers/v1/user");
 
 const router = express.Router();
 

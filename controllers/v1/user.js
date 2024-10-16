@@ -1,7 +1,7 @@
-const User = require("../models/User");
+const User = require("../../models/User");
 const { StatusCodes } = require("http-status-codes");
-const CustomError = require("../errors");
-const { generateRandomCode, getDistanceFromLatLonInMeters } = require("../helpers");
+const CustomError = require("../../errors");
+const { generateRandomCode, getDistanceFromLatLonInMeters } = require("../../helpers");
 
 // Register
 const register = async (req, res, next) => {
