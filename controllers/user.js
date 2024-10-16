@@ -195,6 +195,30 @@ const logAction = async (userId, action) => {
   }
 };
 
+// Get Log
+const getLog = async (req, res, next) => {
+  try {
+    const { deviceId } = req.body;
+
+    // Kendi kullanıcı bilgilerini deviceId ile bul
+    const user = await User.findOne({ deviceId }).populate('following.userId', 'logs');
+    if (!user) {
+      throw new CustomError.NotFoundError("Kullanıcı bulunamadı");
+    }
+
+    // Takip edilen kullanıcıların log verilerini al
+    const followingLogs = user.following.map(following => ({
+      userId: following.userId._id,
+      nickname: following.nickname,
+      logs: following.userId.logs
+    }));
+
+    res.status(StatusCodes.OK).json({ followingLogs });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Helper function to send notification
 const sendNotification = (deviceId, message) => {
   // OneSignal API ile bildirim gönderme işlemi
@@ -209,4 +233,5 @@ module.exports = {
   addZone,
   checkZone,
   logAction,
+  getLog
 };
