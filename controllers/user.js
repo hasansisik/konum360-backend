@@ -195,6 +195,23 @@ const logAction = async (userId, action) => {
   }
 };
 
+// Get Code
+const getCode = async (req, res, next) => {
+  try {
+    const { deviceId } = req.body;
+
+    // Kendi kullanıcı bilgilerini deviceId ile bul
+    const user = await User.findOne({ deviceId });
+    if (!user) {
+      throw new CustomError.NotFoundError("Kullanıcı bulunamadı");
+    }
+
+    res.status(StatusCodes.OK).json({ code: user.code });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Get Log
 const getLog = async (req, res, next) => {
   try {
@@ -233,5 +250,6 @@ module.exports = {
   addZone,
   checkZone,
   logAction,
-  getLog
+  getLog,
+  getCode
 };

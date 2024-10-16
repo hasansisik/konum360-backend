@@ -7,18 +7,19 @@ const {
   toggleVisibility,
   addZone,
   checkZone,
-  getLog
+  getLog,
+  getCode
 } = require("../../controllers/user");
 
 const router = express.Router();
 
-router.post("/register", register);
-router.post("/add-tracker", addTracker);
-router.post("/update-location", updateLocation);
-router.post("/get-following-locations", getFollowingLocations);
-router.post("/toggle-visibility", toggleVisibility);
+router.post("/register", register); 
+router.post("/add-tracker", addTracker); 
+router.put("/update-location", updateLocation); 
+router.get("/get-following-locations", getFollowingLocations); 
+router.patch("/toggle-visibility", toggleVisibility); 
 router.post("/add-zone", addZone);
-router.post("/check-zone", checkZone);
-router.post("/get-log", getLog);
-
+router.post("/check-zone", checkZone); 
+router.get("/get-log", getLog); 
+router.get("/get-code", getCode); 
 module.exports = router;
