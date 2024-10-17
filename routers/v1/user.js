@@ -17,7 +17,7 @@ router.post("/register", register);
 router.get("/load-user/:deviceId", loadUser); 
 router.post("/add-tracker", addTracker); 
 router.put("/update-location", updateLocation); 
-router.get("/get-following-locations", getFollowingLocations); 
+router.get("/following-locations/:deviceId", getFollowingLocations); 
 router.patch("/toggle-visibility", toggleVisibility); 
 router.post("/add-zone", addZone);
 router.post("/check-zone", checkZone); 

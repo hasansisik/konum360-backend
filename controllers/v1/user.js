@@ -1,7 +1,10 @@
 const User = require("../../models/User");
 const { StatusCodes } = require("http-status-codes");
 const CustomError = require("../../errors");
-const { generateRandomCode, getDistanceFromLatLonInMeters } = require("../../helpers");
+const {
+  generateRandomCode,
+  getDistanceFromLatLonInMeters,
+} = require("../../helpers");
 
 // Register
 const register = async (req, res, next) => {
@@ -15,16 +18,16 @@ const register = async (req, res, next) => {
     }
     console.log("Registering new user");
 
-    const code = await generateRandomCode(); 
+    const code = await generateRandomCode();
 
     user = await User.create({
       deviceId,
       code,
       currentLocation: {
-        latitude: 0, 
-        longitude: 0, 
-        timestamp: new Date()
-      }
+        latitude: 0,
+        longitude: 0,
+        timestamp: new Date(),
+      },
     });
 
     res.status(StatusCodes.CREATED).json({ user });
@@ -67,7 +70,9 @@ const addTracker = async (req, res, next) => {
     // Takip edilecek kullanıcıyı code ile bul
     const tracker = await User.findOne({ code });
     if (!tracker) {
-      throw new CustomError.NotFoundError("Takip Edeceğiniz Kullanıcı bulunamadı");
+      throw new CustomError.NotFoundError(
+        "Takip Edeceğiniz Kullanıcı bulunamadı"
+      );
     }
 
     // Kendi following listesine takip edilecek kullanıcıyı ve takma adını ekle
@@ -106,19 +111,25 @@ const updateLocation = async (req, res, next) => {
 // Get Following Locations
 const getFollowingLocations = async (req, res, next) => {
   try {
-    const { deviceId } = req.body;
+    const { deviceId } = req.params;
+
+    console.log("Getting following locations for", deviceId);
 
     // Kendi kullanıcı bilgilerini deviceId ile bul
-    const user = await User.findOne({ deviceId }).populate('following.userId', 'currentLocation');
+    const user = await User.findOne({ deviceId }).populate(
+      "following.userId",
+      "currentLocation picture"
+    );
     if (!user) {
       throw new CustomError.NotFoundError("Kullanıcı bulunamadı");
     }
 
     // Takip edilen kullanıcıların currentLocation verilerini al
-    const followingLocations = user.following.map(following => ({
+    const followingLocations = user.following.map((following) => ({
       userId: following.userId._id,
       nickname: following.nickname,
-      currentLocation: following.userId.currentLocation
+      currentLocation: following.userId.currentLocation,
+      picture: following.userId.picture,
     }));
 
     res.status(StatusCodes.OK).json({ followingLocations });
@@ -163,7 +174,7 @@ const addZone = async (req, res, next) => {
     const newZone = {
       title,
       coordinates: { latitude, longitude },
-      zoneRadius
+      zoneRadius,
     };
 
     user.zones.push(newZone);
@@ -180,15 +191,15 @@ const checkZone = async (req, res, next) => {
   try {
     const { deviceId } = req.body;
 
-    const user = await User.findOne({ deviceId }).populate('following.userId');
+    const user = await User.findOne({ deviceId }).populate("following.userId");
     if (!user) {
       throw new CustomError.NotFoundError("Kullanıcı bulunamadı");
     }
 
-    user.following.forEach(async following => {
+    user.following.forEach(async (following) => {
       const { latitude, longitude } = following.userId.currentLocation;
 
-      following.userId.zones.forEach(async zone => {
+      following.userId.zones.forEach(async (zone) => {
         const distance = getDistanceFromLatLonInMeters(
           latitude,
           longitude,
@@ -198,14 +209,26 @@ const checkZone = async (req, res, next) => {
 
         if (distance <= zone.zoneRadius) {
           // Bildirim gönder
-          sendNotification(user.deviceId, `User ${following.userId.deviceId} entered zone ${zone.title}`);
+          sendNotification(
+            user.deviceId,
+            `User ${following.userId.deviceId} entered zone ${zone.title}`
+          );
           // Log kaydet
-          await logAction(user._id, `User ${following.userId.deviceId} entered zone ${zone.title}`);
+          await logAction(
+            user._id,
+            `User ${following.userId.deviceId} entered zone ${zone.title}`
+          );
         } else {
           // Bildirim gönder
-          sendNotification(user.deviceId, `User ${following.userId.deviceId} exited zone ${zone.title}`);
+          sendNotification(
+            user.deviceId,
+            `User ${following.userId.deviceId} exited zone ${zone.title}`
+          );
           // Log kaydet
-          await logAction(user._id, `User ${following.userId.deviceId} exited zone ${zone.title}`);
+          await logAction(
+            user._id,
+            `User ${following.userId.deviceId} exited zone ${zone.title}`
+          );
         }
       });
     });
@@ -237,16 +260,19 @@ const getLog = async (req, res, next) => {
     const { deviceId } = req.body;
 
     // Kendi kullanıcı bilgilerini deviceId ile bul
-    const user = await User.findOne({ deviceId }).populate('following.userId', 'logs');
+    const user = await User.findOne({ deviceId }).populate(
+      "following.userId",
+      "logs"
+    );
     if (!user) {
       throw new CustomError.NotFoundError("Kullanıcı bulunamadı");
     }
 
     // Takip edilen kullanıcıların log verilerini al
-    const followingLogs = user.following.map(following => ({
+    const followingLogs = user.following.map((following) => ({
       userId: following.userId._id,
       nickname: following.nickname,
-      logs: following.userId.logs
+      logs: following.userId.logs,
     }));
 
     res.status(StatusCodes.OK).json({ followingLogs });

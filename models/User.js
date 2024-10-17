@@ -2,46 +2,50 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const zoneSchema = new Schema({
-  title: { type: String, required: true }, // Lokasyon başlığı
+  title: { type: String, required: true },
   coordinates: {
-    latitude: { type: Number, required: true }, // Enlem
-    longitude: { type: Number, required: true } // Boylam
+    latitude: { type: Number, required: true }, 
+    longitude: { type: Number, required: true } 
   },
-  zoneRadius: { type: Number, required: true } // Çemberin yarıçapı (metre cinsinden)
+  zoneRadius: { type: Number, required: true } 
 });
 
 const logSchema = new Schema({
-  action: { type: String, required: true }, // Yapılan işlem (örn: "okula geldi", "evden çıktı")
-  date: { type: Date, default: Date.now } // İşlemin yapıldığı zaman
+  action: { type: String, required: true },
+  date: { type: Date, default: Date.now } 
 });
 
 const subscriptionSchema = new Schema({
-  isActive: { type: Boolean, default: false }, // Abonelik durumu
-  expirationDate: { type: Date }, // Aboneliğin bitiş tarihi
-  paymentId: { type: String, required: true }, // Ödeme bilgisi için kullanılacak ID
-  lastPaymentDate: { type: Date }, // Son ödeme tarihi
-  paymentMethod: { type: String, required: true } // Ödeme yöntemi (örn: "Apple", "Google")
+  isActive: { type: Boolean, default: false },
+  expirationDate: { type: Date },
+  paymentId: { type: String, required: true },
+  lastPaymentDate: { type: Date },
+  paymentMethod: { type: String, required: true } 
 });
 
 const followingSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Takip edilen kullanıcı ID'si
-  nickname: { type: String, required: true } // Takip edilen kullanıcı için takma ad
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, 
+  nickname: { type: String, required: true } 
 });
 
 const userSchema = new Schema({
-  deviceId: { type: String, required: true, unique: true }, // Cihaz ID'si (örn: UUID)
-  code: { type: String, required: true, unique: true }, // Kullanıcı kodu
-  zones: [zoneSchema], // Kullanıcının belirlediği lokasyon çemberleri
-  currentLocation: { // Kullanıcının mevcut konumu
-    latitude: { type: Number, required: true }, // Mevcut enlem
-    longitude: { type: Number, required: true }, // Mevcut boylam
-    timestamp: { type: Date, default: Date.now } // Konum güncellenme zamanı
+  deviceId: { type: String, required: true, unique: true }, 
+  code: { type: String, required: true, unique: true },
+  zones: [zoneSchema], 
+  currentLocation: {
+    latitude: { type: Number, required: true }, 
+    longitude: { type: Number, required: true }, 
+    timestamp: { type: Date, default: Date.now } 
   },
-  following: [followingSchema], // Takip ettiğim kullanıcılar ve takma adları
-  followers: [{ type: Schema.Types.ObjectId, ref: 'User' }], // Beni takip eden kullanıcılar
-  visibility: { type: Boolean, default: true }, // Kullanıcının görünürlük durumu
-  logs: [logSchema], // Kullanıcının yaptığı işlemler
-  subscription: subscriptionSchema // Kullanıcının abonelik bilgileri
+  following: [followingSchema], 
+  followers: [{ type: Schema.Types.ObjectId, ref: 'User' }], 
+  visibility: { type: Boolean, default: true }, 
+  logs: [logSchema],
+  subscription: subscriptionSchema,
+  picture: {
+    type: String,
+    default:"https://i.ibb.co/6t34MRH/user.png"
+  },
 });
 
 const User = mongoose.model("User", userSchema);
