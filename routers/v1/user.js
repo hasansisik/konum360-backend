@@ -1,6 +1,7 @@
 const express = require("express");
 const {
   register,
+  loadUser,
   addTracker,
   updateLocation,
   getFollowingLocations,
@@ -8,12 +9,12 @@ const {
   addZone,
   checkZone,
   getLog,
-  getCode
 } = require("../../controllers/v1/user");
 
 const router = express.Router();
 
-router.post("/register", register); 
+router.post("/register", register);
+router.get("/load-user/:deviceId", loadUser); 
 router.post("/add-tracker", addTracker); 
 router.put("/update-location", updateLocation); 
 router.get("/get-following-locations", getFollowingLocations); 
@@ -21,5 +22,5 @@ router.patch("/toggle-visibility", toggleVisibility);
 router.post("/add-zone", addZone);
 router.post("/check-zone", checkZone); 
 router.get("/get-log", getLog); 
-router.get("/get-code", getCode); 
+
 module.exports = router;

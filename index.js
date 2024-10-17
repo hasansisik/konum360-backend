@@ -27,7 +27,7 @@ app.use(express.static('./public'));
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/v1/auth', authRouter);
+app.use('/v1/user', authRouter);
 
 app.use(notFoundMiddleware);
 app.use(erorHandlerMiddleware);

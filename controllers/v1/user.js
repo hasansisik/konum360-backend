@@ -7,12 +7,47 @@ const { generateRandomCode, getDistanceFromLatLonInMeters } = require("../../hel
 const register = async (req, res, next) => {
   try {
     const { deviceId } = req.body;
-    const code = generateRandomCode();
 
-    const user = await User.create({ deviceId, code });
+    // Mevcut kullanıcıyı kontrol et
+    let user = await User.findOne({ deviceId });
+    if (user) {
+      return res.status(StatusCodes.OK).json({ user });
+    }
+    console.log("Registering new user");
+
+    const code = await generateRandomCode(); 
+
+    user = await User.create({
+      deviceId,
+      code,
+      currentLocation: {
+        latitude: 0, 
+        longitude: 0, 
+        timestamp: new Date()
+      }
+    });
 
     res.status(StatusCodes.CREATED).json({ user });
   } catch (error) {
+    console.error("Register Error:", error);
+    next(error);
+  }
+};
+
+// Load User
+const loadUser = async (req, res, next) => {
+  try {
+    const { deviceId } = req.params;
+
+    // Kullanıcıyı deviceId ile bul
+    const user = await User.findOne({ deviceId });
+    if (!user) {
+      throw new CustomError.NotFoundError("Kullanıcı bulunamadı");
+    }
+
+    res.status(StatusCodes.OK).json({ user });
+  } catch (error) {
+    console.error("Load User Error:", error);
     next(error);
   }
 };
@@ -21,6 +56,7 @@ const register = async (req, res, next) => {
 const addTracker = async (req, res, next) => {
   try {
     const { deviceId, code, nickname } = req.body;
+    console.log("Adding tracker", deviceId, code, nickname);
 
     // Kendi kullanıcı bilgilerini deviceId ile bul
     const user = await User.findOne({ deviceId });
@@ -195,23 +231,6 @@ const logAction = async (userId, action) => {
   }
 };
 
-// Get Code
-const getCode = async (req, res, next) => {
-  try {
-    const { deviceId } = req.body;
-
-    // Kendi kullanıcı bilgilerini deviceId ile bul
-    const user = await User.findOne({ deviceId });
-    if (!user) {
-      throw new CustomError.NotFoundError("Kullanıcı bulunamadı");
-    }
-
-    res.status(StatusCodes.OK).json({ code: user.code });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // Get Log
 const getLog = async (req, res, next) => {
   try {
@@ -243,6 +262,7 @@ const sendNotification = (deviceId, message) => {
 
 module.exports = {
   register,
+  loadUser,
   addTracker,
   updateLocation,
   getFollowingLocations,
@@ -251,5 +271,4 @@ module.exports = {
   checkZone,
   logAction,
   getLog,
-  getCode
 };
